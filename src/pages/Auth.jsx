@@ -57,8 +57,7 @@ const Auth = () => {
 
     if (res.success) {
       addToast(res.message, 'success');
-      setVerifyEmail(res.email);
-      setIsVerifying(true);
+      setActiveTab('login'); // Switch directly to login tab
     } else {
       addToast(res.message, 'error');
     }
