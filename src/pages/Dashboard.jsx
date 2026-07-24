@@ -5,6 +5,14 @@ import { useToast } from '../context/ToastContext';
 import axios from 'axios';
 import { User, ShoppingBag, MapPin, Settings, Key, Phone, Mail, Edit, Plus, Trash2, Printer, MapPinOff } from 'lucide-react';
 
+const getApiBaseURL = () => {
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  if (url && !url.endsWith('/api')) {
+    url = url.replace(/\/$/, '') + '/api';
+  }
+  return url;
+};
+
 const Dashboard = () => {
   const { user, updateProfile, addAddress, deleteAddress } = useAuth();
   const { addToast } = useToast();
@@ -415,7 +423,7 @@ const Dashboard = () => {
                           </button>
 
                           <a
-                            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/orders/${order._id}/invoice`}
+                            href={`${getApiBaseURL()}/orders/${order._id}/invoice`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-1.5 bg-gold/10 hover:bg-gold/20 text-gold rounded border border-gold/25"
