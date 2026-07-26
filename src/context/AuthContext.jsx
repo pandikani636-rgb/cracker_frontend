@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', response.data.token);
         setToken(response.data.token);
         setUser(response.data.user);
-        return { success: true };
+        return { success: true, user: response.data.user };
       }
     } catch (error) {
       return {
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', response.data.token);
         setToken(response.data.token);
         setUser(response.data.user);
-        return { success: true };
+        return { success: true, user: response.data.user };
       }
     } catch (error) {
       return {

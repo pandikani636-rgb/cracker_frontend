@@ -36,7 +36,11 @@ const Auth = () => {
 
     if (res.success) {
       addToast('Logged in successfully!', 'success');
-      navigate(from, { replace: true });
+      if (res.user && res.user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } else {
       addToast(res.message, 'error');
       // If unverified, automatically show the OTP input panel!
@@ -73,7 +77,11 @@ const Auth = () => {
 
     if (res.success) {
       addToast('Email verified! Account registered successfully.', 'success');
-      navigate(from, { replace: true });
+      if (res.user && res.user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } else {
       addToast(res.message, 'error');
     }
