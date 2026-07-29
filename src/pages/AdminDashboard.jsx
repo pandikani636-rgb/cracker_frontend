@@ -318,6 +318,63 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleProductImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    const urls = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      try {
+        const res = await axios.post('/admin/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        if (res.data.success) {
+          urls.push(res.data.url);
+        }
+      } catch (err) {
+        console.error('Error uploading image:', err);
+        addToast('Error uploading image', 'error');
+      }
+    }
+    
+    setProductForm(prev => ({
+      ...prev,
+      images: [...prev.images, ...urls]
+    }));
+    addToast('Images uploaded successfully!', 'success');
+  };
+
+  const handleCategoryImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const res = await axios.post('/admin/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      if (res.data.success) {
+        setCategoryForm(prev => ({
+          ...prev,
+          image: res.data.url
+        }));
+        addToast('Category image uploaded successfully!', 'success');
+      }
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      addToast('Error uploading image', 'error');
+    }
+  };
+
   if (!user || user.role !== 'admin') return null;
 
   // Sidebar menu items
@@ -1047,13 +1104,35 @@ const AdminDashboard = () => {
                           placeholder="Discount % (e.g. 10)"
                           className="bg-white border border-amber-200/50 rounded-xl px-4 py-2.5 text-sm text-[#1a0e0a] focus:outline-none focus:border-amber-400 transition-colors"
                         />
-                        <input
-                          type="text"
-                          value={productForm.images.join(', ')}
-                          onChange={(e) => setProductForm({ ...productForm, images: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                          placeholder="Image URLs (comma separated)"
-                          className="bg-white border border-amber-200/50 rounded-xl px-4 py-2.5 text-sm text-[#1a0e0a] focus:outline-none focus:border-amber-400 transition-colors sm:col-span-2"
-                        />
+                        <div className="bg-white border border-amber-200/50 rounded-xl p-4 sm:col-span-2">
+                          <label className="block text-xs font-semibold text-amber-700/60 uppercase tracking-wider mb-2">Product Images</label>
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleProductImageUpload}
+                            className="text-xs text-[#1a0e0a] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer"
+                          />
+                          {productForm.images.length > 0 && (
+                            <div className="flex gap-2 flex-wrap mt-4">
+                              {productForm.images.map((img, idx) => (
+                                <div key={idx} className="relative w-16 h-16 rounded-lg border border-amber-200/50 overflow-hidden bg-amber-50/10">
+                                  <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                  <button
+                                    type="button"
+                                    onClick={() => setProductForm(prev => ({
+                                      ...prev,
+                                      images: prev.images.filter((_, i) => i !== idx)
+                                    }))}
+                                    className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                         <textarea
                           required
                           value={productForm.description}
@@ -1239,13 +1318,27 @@ const AdminDashboard = () => {
                           placeholder="Category Name *"
                           className="bg-white border border-amber-200/50 rounded-xl px-4 py-2.5 text-sm text-[#1a0e0a] focus:outline-none focus:border-amber-400 transition-colors"
                         />
-                        <input
-                          type="text"
-                          value={categoryForm.image}
-                          onChange={(e) => setCategoryForm({ ...categoryForm, image: e.target.value })}
-                          placeholder="Image URL"
-                          className="bg-white border border-amber-200/50 rounded-xl px-4 py-2.5 text-sm text-[#1a0e0a] focus:outline-none focus:border-amber-400 transition-colors"
-                        />
+                        <div className="bg-white border border-amber-200/50 rounded-xl p-4 sm:col-span-2">
+                          <label className="block text-xs font-semibold text-amber-700/60 uppercase tracking-wider mb-2">Category Image</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCategoryImageUpload}
+                            className="text-xs text-[#1a0e0a] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer"
+                          />
+                          {categoryForm.image && (
+                            <div className="relative w-20 h-20 rounded-lg border border-amber-200/50 overflow-hidden bg-amber-50/10 mt-4">
+                              <img src={categoryForm.image} alt="Category preview" className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => setCategoryForm(prev => ({ ...prev, image: '' }))}
+                                className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
                         <textarea
                           value={categoryForm.description}
                           onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
